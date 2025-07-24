@@ -153,6 +153,10 @@ CSRF_COOKIE_SECURE = True
 # Optional (helps browsers prevent content-type sniffing)
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
+# Trust the X-Forwarded-Proto header set by proxy (e.g., Nginx or Heroku)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
 # Optional (helps prevent clickjacking)
 X_FRAME_OPTIONS = "DENY"
 
