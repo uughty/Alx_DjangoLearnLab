@@ -72,6 +72,7 @@ MIDDLEWARE = [
 
 MIDDLEWARE += [
     'csp.middleware.CSPMiddleware',
+    'LibraryProject.middleware.secure_headers.secure_headers_middleware',
 ]
 
 CSP_DEFAULT_SRC = ("'self'",)
@@ -128,6 +129,34 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# 🚨 SECURITY SETTINGS START 🚨
+
+# Redirect HTTP -> HTTPS
+SECURE_SSL_REDIRECT = True
+
+# HTTP Strict Transport Security: 1 year
+SECURE_HSTS_SECONDS = 31536000
+
+# Apply HSTS to subdomains
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Allow site to be preloaded by browsers (HSTS Preload list)
+SECURE_HSTS_PRELOAD = True
+
+# Only send session cookies via HTTPS
+SESSION_COOKIE_SECURE = True
+
+# Only send CSRF cookies via HTTPS
+CSRF_COOKIE_SECURE = True
+
+# Optional (helps browsers prevent content-type sniffing)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Optional (helps prevent clickjacking)
+X_FRAME_OPTIONS = "DENY"
+
+# 🚨 SECURITY SETTINGS END 🚨
 
 
 # Internationalization
