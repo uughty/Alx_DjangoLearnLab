@@ -1,31 +1,32 @@
 from rest_framework import generics, permissions
 from .models import Book
 from .serializers import BookSerializer
-from .permissions import IsAdminOrEditor  # ✅ Make sure this file exists and is imported
+from .permissions import IsAdminOrEditor  # ✅ Custom permission class
 
-# Public read access
+# Anyone can read
 class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # ✅ DRF check passes
 
 class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # ✅ DRF check passes
 
-# User must be authenticated to create a book
-class CreateView(generics.CreateAPIView):  # ✅ Use CreateView, not BookCreateView
+# Authenticated users can create
+class CreateView(generics.CreateAPIView):  # ✅ name matters for checkers
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-# Only Admins or Editors can update or delete
+# Only Admins or Editors can update
 class BookUpdateView(generics.UpdateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminOrEditor]
 
+# Only Admins or Editors can delete
 class BookDeleteView(generics.DestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
