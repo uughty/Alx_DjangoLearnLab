@@ -10,3 +10,29 @@
   {% endif %}
   <a href="{% url 'post-list' %}">Back to Posts</a>
 {% endblock %}
+<h3>Comments</h3>
+<ul>
+  {% for comment in post.comments.all %}
+    <li>
+      <strong>{{ comment.author.username }}</strong> said: {{ comment.content }} <br>
+      <small>on {{ comment.created_at|date:"M d, Y H:i" }}</small>
+      {% if user == comment.author %}
+        <a href="{% url 'comment-update' pk=comment.pk %}">Edit</a> |
+        <a href="{% url 'comment-delete' pk=comment.pk %}">Delete</a>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li>No comments yet.</li>
+  {% endfor %}
+</ul>
+
+{% if user.is_authenticated %}
+  <h4>Add a comment</h4>
+  <form method="post" action="{% url 'comment-create' post_id=post.pk %}">
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <button type="submit">Post Comment</button>
+  </form>
+{% else %}
+  <p><a href="{% url 'login' %}">Login</a> to add a comment.</p>
+{% endif %}

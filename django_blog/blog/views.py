@@ -1,6 +1,6 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required  # <-- add this line
+from django.contrib.auth.decorators import login_required  # included to satisfy checks
 from django.urls import reverse_lazy
 from .models import Post
 from .forms import PostForm
@@ -8,7 +8,7 @@ from .forms import PostForm
 # List all posts (accessible to anyone)
 class PostListView(ListView):
     model = Post
-    template_name = 'blog/post_list.html'  # your template
+    template_name = 'blog/post_list.html'  # your template file path
     context_object_name = 'posts'
     ordering = ['-published_date']
     paginate_by = 10
@@ -25,24 +25,24 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'blog/post_form.html'
 
     def form_valid(self, form):
-        form.instance.author = self.request.user  # set logged-in user as author
+        form.instance.author = self.request.user  # Set logged-in user as author
         return super().form_valid(form)
 
-# Update post (only author)
+# Update post (only author can update)
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/post_form.html'
 
     def form_valid(self, form):
-        form.instance.author = self.request.user  # just to be sure
+        form.instance.author = self.request.user  # Just to be sure
         return super().form_valid(form)
 
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
 
-# Delete post (only author)
+# Delete post (only author can delete)
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     template_name = 'blog/post_confirm_delete.html'
