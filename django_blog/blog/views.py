@@ -1,13 +1,37 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
-from .models import Comment, Post
-from .forms import CommentForm, PostForm  # Assuming you have PostForm
 from django.db.models import Q
+from django.contrib.auth.models import User
+from django import forms
+from django.contrib import messages
 
+from .models import Comment, Post
+from .forms import CommentForm, PostForm
 
-# POST VIEWS
+# --- Profile Form and View ---
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+
+@login_required
+def profile_view(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()  # saves user profile updates
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('profile')
+    else:
+        form = ProfileForm(instance=request.user)
+
+    return render(request, 'blog/profile.html', {'form': form})
+
+# --- Post Views ---
 
 class PostListView(ListView):
     model = Post
@@ -67,6 +91,8 @@ class PostSearchView(ListView):
             ).distinct()
         else:
             return Post.objects.none()
+
+# --- Comment Views ---
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
