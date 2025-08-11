@@ -12,6 +12,7 @@ from .views import (
     CommentCreateView,
     CommentUpdateView,
     CommentDeleteView,
+    # other views...
 )
 
 urlpatterns = [
@@ -19,16 +20,15 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
+     path('post/<int:pk>/comments/new/', CommentCreateView.as_view(), name='comment-create'),
+    path('comment/<int:pk>/update/', CommentUpdateView.as_view(), name='comment-update'),
+    path('comment/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment-delete'),
 ]
 
 urlpatterns += [
     path('posts/', PostListView.as_view(), name='post-list'),  # This one is fine as plural
     path('post/new/', PostCreateView.as_view(), name='post-create'),  # singular 'post' here
     path('post/<int:pk>/', PostDetailView.as_view(), name='post-detail'),  # singular 'post'
-    path('post/<int:pk>/update/', PostUpdateView.as_view(), name='post-update'),  # singular + 'update' instead of 'edit'
-    path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),  # singular + delete
-   path('posts/<int:post_id>/comments/new/', CommentCreateView.as_view(), name='comment-create'),
-    path('comments/<int:pk>/edit/', CommentUpdateView.as_view(), name='comment-update'),
-    path('comments/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment-delete'),
+    
 ]
 
