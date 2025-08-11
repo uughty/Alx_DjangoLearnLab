@@ -4,6 +4,8 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from .models import Comment, Post
 from .forms import CommentForm, PostForm  # Assuming you have PostForm
+from django.db.models import Q
+
 
 # POST VIEWS
 
@@ -49,7 +51,22 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         post = self.get_object()
         return self.request.user == post.author
 
-# COMMENT VIEWS
+class PostSearchView(ListView):
+    model = Post
+    template_name = 'blog/post_search.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        if query:
+            return Post.objects.filter(
+                Q(title__icontains=query) | 
+                Q(content__icontains=query) | 
+                Q(tags__name__icontains=query)
+            ).distinct()
+        else:
+            return Post.objects.none()
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
