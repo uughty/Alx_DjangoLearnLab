@@ -1,15 +1,14 @@
-<!-- bookshelf/templates/bookshelf/form_example.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Book Form</title>
+    <title>Submit a Book</title>
 </head>
 <body>
-    <h1>{{ form_title }}</h1>
+    <h1>Submit a Book</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Save</button>
+        <button type="submit">Submit</button>
     </form>
 </body>
 </html>

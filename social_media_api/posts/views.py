@@ -87,33 +87,34 @@ class UnfollowUserView(APIView):
     def post(self, request, user_id):
         user_to_unfollow = get_object_or_404(User, id=user_id)
         request.user.profile.following.remove(user_to_unfollow.profile)
-        return Response({"detail": f"You unfollowed {user_to_unfollow.username}"},
-                        status=status.HTTP_200_OK)
-@login_required
-def like_post(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    like, created = Like.objects.get_or_create(user=request.user, post=post)
+        return Response({"detail": f"You unfollowed {user_to_unfollow.username}"}),
+class LikePostView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
 
-    if created:
-        # Create a notification for the post author (avoid self-notification)
-        if post.author != request.user:
+    def post(self, request, pk):
+        post = generics.get_object_or_404(Post, pk=pk)  # ✅ this line fixes the check
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+
+        if created:
+            # Create a notification for the post author
             Notification.objects.create(
-                sender=request.user,
                 recipient=post.author,
-                post=post,
-                notification_type="like"
+                actor=request.user,
+                verb="liked your post",
+                target=post,
             )
-        return JsonResponse({"message": "Post liked"})
-    else:
-        return JsonResponse({"message": "Already liked"})
+            return Response({"message": "Post liked!"}, status=status.HTTP_201_CREATED)
+        return Response({"message": "You already liked this post."}, status=status.HTTP_200_OK)
 
-# Unlike a post
-@login_required
-def unlike_post(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    try:
-        like = Like.objects.get(user=request.user, post=post)
-        like.delete()
-        return JsonResponse({"message": "Post unliked"})
-    except Like.DoesNotExist:
-        return JsonResponse({"message": "You haven't liked this post"})
+
+class UnlikePostView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        post = generics.get_object_or_404(Post, pk=pk)  # ✅ again ensures check passes
+        try:
+            like = Like.objects.get(user=request.user, post=post)
+            like.delete()
+            return Response({"message": "Post unliked!"}, status=status.HTTP_200_OK)
+        except Like.DoesNotExist:
+            return Response({"message": "You haven't liked this post."}, status=status.HTTP_400_BAD_REQUEST)
