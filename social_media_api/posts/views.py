@@ -15,6 +15,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import Post, Like
 from django.contrib import admin
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Post, Like
+from notifications.models import Notification
 
 admin.site.register(Post)
 admin.site.register(Like)
@@ -84,3 +89,31 @@ class UnfollowUserView(APIView):
         request.user.profile.following.remove(user_to_unfollow.profile)
         return Response({"detail": f"You unfollowed {user_to_unfollow.username}"},
                         status=status.HTTP_200_OK)
+@login_required
+def like_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    like, created = Like.objects.get_or_create(user=request.user, post=post)
+
+    if created:
+        # Create a notification for the post author (avoid self-notification)
+        if post.author != request.user:
+            Notification.objects.create(
+                sender=request.user,
+                recipient=post.author,
+                post=post,
+                notification_type="like"
+            )
+        return JsonResponse({"message": "Post liked"})
+    else:
+        return JsonResponse({"message": "Already liked"})
+
+# Unlike a post
+@login_required
+def unlike_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    try:
+        like = Like.objects.get(user=request.user, post=post)
+        like.delete()
+        return JsonResponse({"message": "Post unliked"})
+    except Like.DoesNotExist:
+        return JsonResponse({"message": "You haven't liked this post"})
