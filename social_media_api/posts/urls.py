@@ -5,6 +5,7 @@ from .views import feed
 from .views import FollowUserView, UnfollowUserView
 from .views import FeedView
 from . import views
+from .views import FeedView, LikePostView, UnlikePostView
 
 
 
@@ -15,6 +16,6 @@ router.register(r'comments', CommentViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('feed/', FeedView.as_view(), name='feed'), 
-     path("like/<int:pk>/", views.like_post, name="like_post"),
-    path("unlike/<int:pk>/", views.unlike_post, name="unlike_post"),
+      path('<int:pk>/like/', LikePostView.as_view(), name='like-post'),
+    path('<int:pk>/unlike/', UnlikePostView.as_view(), name='unlike-post'),
 ]
