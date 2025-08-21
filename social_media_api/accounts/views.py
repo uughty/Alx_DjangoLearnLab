@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from .models import CustomUser
 
-all_users = CustomUser.objects.all()
+users = CustomUser.objects.all()
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
