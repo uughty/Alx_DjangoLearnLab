@@ -7,7 +7,19 @@ from rest_framework.response import Response
 from .models import Post
 from .serializers import PostSerializer
 from rest_framework import generics, permissions
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from .models import Post, Like
+from django.contrib import admin
 
+admin.site.register(Post)
+admin.site.register(Like)
+
+User = get_user_model()
 # Custom permission: only allow authors to edit/delete their own posts & comments
 class IsAuthorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -54,3 +66,21 @@ class FeedView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Post.objects.filter(author__in=user.following.all()).order_by('-created_at')
+    
+class FollowUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        user_to_follow = get_object_or_404(User, id=user_id)
+        request.user.profile.following.add(user_to_follow.profile)
+        return Response({"detail": f"You are now following {user_to_follow.username}"},
+                        status=status.HTTP_200_OK)
+
+class UnfollowUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        user_to_unfollow = get_object_or_404(User, id=user_id)
+        request.user.profile.following.remove(user_to_unfollow.profile)
+        return Response({"detail": f"You unfollowed {user_to_unfollow.username}"},
+                        status=status.HTTP_200_OK)
