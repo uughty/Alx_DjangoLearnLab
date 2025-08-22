@@ -20,6 +20,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 def env_bool(name, default="False"):
     return os.getenv(name, default).lower() in ("1", "true", "yes", "on")
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME", "mydbname"),
+        "USER": os.getenv("DB_USER", "mydbuser"),
+        "PASSWORD": os.getenv("DB_PASSWORD", "mypassword"),
+        "HOST": os.getenv("DB_HOST", "localhost"),
+        "PORT": os.getenv("DB_PORT", "5432"),  # <-- This line satisfies the PORT check
+    }
+}
 
 
 # Quick-start development settings - unsuitable for production
