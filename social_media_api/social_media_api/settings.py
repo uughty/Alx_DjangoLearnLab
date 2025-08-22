@@ -26,7 +26,9 @@ def env_bool(name, default="False"):
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-default")  # replace in prod!
-DEBUG = env_bool("DJANGO_DEBUG", "False")
+
+DEBUG = False
+
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if not DEBUG else ["*"]
 AUTH_USER_MODEL = 'accounts.CustomUser'
